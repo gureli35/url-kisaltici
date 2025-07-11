@@ -29,6 +29,15 @@ app.use(express.urlencoded({ extended: true })); // URL encoded parser
 // API rotalarını ayarla
 app.use('/api/urls', urlRoutes);
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    database: 'Connected'
+  });
+});
+
 // Kısa URL yönlendirme
 app.get('/:shortCode', urlController.redirectToOriginalUrl);
 

@@ -50,27 +50,23 @@ const redirectToOriginalUrl = async (req, res) => {
     const { shortCode } = req.params;
     
     // Kısa kodu doğrula
-    if (!shortCode || shortCode.length !== 6) {
+    if (!shortCode) {
       return res.status(400).json({ error: 'Geçersiz kısa kod' });
     }
     
     // URL'yi bul
-    const urlData = await urlModel.getUrlByShortCode(shortCode);
+    const urlData = await urlModel.findByShortCode(shortCode);
     
     if (!urlData) {
       return res.status(404).json({ error: 'URL bulunamadı' });
     }
     
-    // Log bilgilerini topla
-    const logData = {
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-      userAgent: req.headers['user-agent'],
-      referrer: req.headers.referer || req.headers.referrer
-    };
-    
-    // Tıklama sayısını artır (asenkron olarak yap, yanıtı bekletme)
-    urlModel.incrementClickCount(urlData.id, logData)
-      .catch(err => console.error('Tıklama sayısı artırma hatası:', err));
+    // Tıklama sayısını artır (shortCode ile)
+    try {
+      await urlModel.incrementClickCount(shortCode);
+    } catch (err) {
+      console.error('Tıklama sayısı artırma hatası:', err);
+    }
     
     // Orijinal URL'ye yönlendir
     res.redirect(urlData.original_url);
@@ -143,9 +139,109 @@ const getUrlStats = async (req, res) => {
   }
 };
 
+// Yeni API route'lar için ek fonksiyonlar
+const createUrl = async (req, res) => {
+  try {
+    const { originalUrl } = req.body;
+    
+    // URL doğrulama
+    if (!originalUrl) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Original URL is required' 
+      });
+    }
+    
+    if (!isValidUrl(originalUrl)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Please provide a valid URL' 
+      });
+    }
+
+    // Mevcut URL'yi kontrol et
+    const existingUrl = await urlModel.findByOriginalUrl(originalUrl);
+    if (existingUrl) {
+      const host = req.get('host') || 'localhost:3000';
+      return res.status(200).json({
+        success: true,
+        data: {
+          id: existingUrl.id,
+          originalUrl: existingUrl.original_url,
+          shortCode: existingUrl.short_code,
+          shortUrl: `http://${host}/${existingUrl.short_code}`,
+          clickCount: existingUrl.click_count,
+          createdAt: existingUrl.created_at
+        }
+      });
+    }
+
+    // Yeni kısa kod oluştur
+    const { nanoid } = require('nanoid');
+    const shortCode = nanoid(8);
+    
+    // Yeni URL oluştur
+    const urlData = await urlModel.create({
+      originalUrl,
+      shortCode
+    });
+
+    const host = req.get('host') || 'localhost:3000';
+    
+    res.status(201).json({
+      success: true,
+      data: {
+        id: urlData.id,
+        originalUrl: urlData.originalUrl,
+        shortCode: urlData.shortCode,
+        shortUrl: `http://${host}/${urlData.shortCode}`,
+        clickCount: 0,
+        createdAt: new Date().toISOString()
+      }
+    });
+
+  } catch (err) {
+    console.error('API Error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
+const getUrls = async (req, res) => {
+  try {
+    const urls = await urlModel.findAll();
+    const host = req.get('host') || 'localhost:3000';
+    
+    const formattedUrls = urls.map(url => ({
+      id: url.id,
+      originalUrl: url.original_url,
+      shortCode: url.short_code,
+      shortUrl: `http://${host}/${url.short_code}`,
+      clickCount: url.click_count,
+      createdAt: url.created_at
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: formattedUrls
+    });
+
+  } catch (err) {
+    console.error('API Error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   createShortUrl,
   redirectToOriginalUrl,
   getAllUrls,
-  getUrlStats
+  getUrlStats,
+  createUrl,
+  getUrls
 };

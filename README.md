@@ -14,13 +14,13 @@ URL Shortener, uzun web adreslerini daha kısa ve kolay paylaşılabilir hale ge
 
 ## Uygulama Özellikleri
 
-⚡ Uzun URL'yi kısa bağlantıya dönüştürme
-⚡ Kısa link üzerinden orijinal URL'ye yönlendirme
-⚡ MySQL veritabanı üzerinden veri saklama
-⚡ Tıklanma sayısını artırma ve loglama
-⚡ RESTful API ile modern backend mimarisi
-⚡ Shadcn UI ile modern, responsive frontend arayüz
-⚡ İstatistik görüntüleme ve yönetim paneli
+⚡ Uzun URL'yi kısa bağlantıya dönüştürme  
+⚡ Kısa link üzerinden orijinal URL'ye yönlendirme  
+⚡ MySQL veritabanı üzerinden veri saklama  
+⚡ Tıklanma sayısını artırma ve loglama  
+⚡ RESTful API ile modern backend mimarisi  
+⚡ Shadcn UI ile modern, responsive frontend arayüz  
+⚡ İstatistik görüntüleme ve yönetim paneli  
 
 ## Teknolojiler
 
@@ -29,106 +29,97 @@ URL Shortener, uzun web adreslerini daha kısa ve kolay paylaşılabilir hale ge
 - **Express.js** - Web framework
 - **MySQL** - Veritabanı
 - **nanoid** - Kısa ID üretimi
-- **validator** - URL doğrulama
+- **CORS** - Cross-origin resource sharing
+- **Helmet** - Güvenlik middleware
 
 ### Frontend
 - **Next.js 15** - React framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
-- **Shadcn UI** - Modern UI bileşenleri
-- **Axios** - HTTP istekleri
-- **React Hook Form + Zod** - Form yönetimi
+- **Shadcn UI** - Component library
+- **Axios** - HTTP client
+- **Sonner** - Toast notifications
 
-## Kurulum
+## Localhost Kurulumu
 
 ### Gereksinimler
 - Node.js (v18 veya üzeri)
 - MySQL (v8 veya üzeri)
 - npm veya yarn
 
-### Backend Kurulumu
+### 1. Projeyi klonlayın
+```bash
+git clone https://github.com/gureli35/url-kisaltici.git
+cd url-kisaltici
+```
 
-1. API klasörüne gidin:
-\`\`\`bash
-cd api
-\`\`\`
+### 2. MySQL Veritabanını Ayarlayın
+```bash
+# MySQL'i başlatın
+brew services start mysql
 
-2. Gerekli paketleri kurun:
-\`\`\`bash
-npm install
-\`\`\`
+# MySQL'e bağlanın
+mysql -u root -p
 
-3. MySQL veritabanını oluşturun:
-\`\`\`sql
+# Veritabanı oluşturun
 CREATE DATABASE url_shortener;
-\`\`\`
+```
 
-4. \`.env\` dosyasını düzenleyin:
-\`\`\`env
-# Server Config
-PORT=3000
+### 3. Backend'i kurun ve çalıştırın
+```bash
+cd api
+npm install
+cp .env.example .env
+# .env dosyasını MySQL bilgilerinize göre düzenleyin
+npm start
+```
 
-# Database Config
+### 4. Frontend'i kurun ve çalıştırın
+```bash
+cd ../client
+npm install
+npm run dev
+```
+
+### 5. Uygulamayı kullanın
+- Frontend: http://localhost:3001
+- Backend API: http://localhost:3000
+
+## Environment Variables
+
+### Backend (api/.env)
+```env
 DB_HOST=localhost
-DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=
+DB_PASSWORD=your_mysql_password
 DB_DATABASE=url_shortener
-
-# App Config
+DB_PORT=3306
 APP_URL=http://localhost:3000
 CLIENT_URL=http://localhost:3001
-\`\`\`
+PORT=3000
+```
 
-5. API sunucusunu başlatın:
-\`\`\`bash
-npm run dev
-\`\`\`
-
-### Frontend Kurulumu
-
-1. Client klasörüne gidin:
-\`\`\`bash
-cd client
-\`\`\`
-
-2. Gerekli paketleri kurun:
-\`\`\`bash
-npm install
-\`\`\`
-
-3. \`.env.local\` dosyasını oluşturun:
-\`\`\`env
+### Frontend (client/.env.local)
+```env
 NEXT_PUBLIC_API_URL=http://localhost:3000/api
-\`\`\`
-
-4. Frontend sunucusunu başlatın:
-\`\`\`bash
-PORT=3001 npm run dev
-\`\`\`
-
 ## API Endpoints
 
 ### URL Kısaltma
-- **POST** \`/api/urls/shorten\`
-  - Body: \`{ "originalUrl": "https://example.com" }\`
-  - Response: \`{ "originalUrl", "shortUrl", "shortCode", "clickCount", "createdAt" }\`
+- **POST** `/api/urls/shorten`
+  - Body: `{ "originalUrl": "https://example.com" }`
+  - Response: URL bilgileri
 
 ### Tüm URL'leri Getirme
-- **GET** \`/api/urls/all\`
+- **GET** `/api/urls/all`
   - Response: URL listesi
 
-### URL İstatistikleri
-- **GET** \`/api/urls/stats/:id\`
-  - Response: URL detayları ve log kayıtları
-
 ### Yönlendirme
-- **GET** \`/:shortCode\`
+- **GET** `/:shortCode`
   - Kısa koda ait orijinal URL'ye yönlendirme
 
 ## Kullanım
 
-1. Tarayıcınızda \`http://localhost:3001\` adresine gidin
+1. Tarayıcınızda `http://localhost:3001` adresine gidin
 2. "URL Kısalt" sekmesinde uzun URL'nizi girin
 3. "URL'yi Kısalt" butonuna tıklayın
 4. Oluşturulan kısa URL'yi kopyalayın ve paylaşın
@@ -137,18 +128,47 @@ PORT=3001 npm run dev
 ## Veritabanı Yapısı
 
 ### urls tablosu
-- \`id\` - Primary key
-- \`original_url\` - Orijinal uzun URL
-- \`short_code\` - 6 karakterlik benzersiz kod
-- \`click_count\` - Tıklanma sayısı
-- \`created_at\` - Oluşturulma tarihi
+- `id` - Primary key
+- `original_url` - Orijinal uzun URL
+- `short_code` - 6 karakterlik benzersiz kod
+- `click_count` - Tıklanma sayısı
+- `created_at` - Oluşturulma tarihi
 
 ### url_logs tablosu
-- \`id\` - Primary key
-- \`url_id\` - urls tablosuna referans
-- \`ip_address\` - Ziyaretçi IP adresi
-- \`user_agent\` - Tarayıcı bilgisi
-- \`referrer\` - Yönlendiren sayfa
+- `id` - Primary key
+- `url_id` - urls tablosuna referans
+- `ip_address` - Ziyaretçi IP adresi
+- `user_agent` - Tarayıcı bilgisi
+- `referrer` - Yönlendiren sayfa
+- `accessed_at` - Erişim tarihi
+
+## Proje Yapısı
+
+```
+url-kisaltici/
+├── api/                 # Backend Express.js uygulaması
+│   ├── config/         # Veritabanı konfigürasyonu
+│   ├── controllers/    # API controller'ları
+│   ├── models/         # Veritabanı modelleri
+│   ├── routes/         # API route'ları
+│   └── utils/          # Yardımcı fonksiyonlar
+└── client/             # Frontend Next.js uygulaması
+    ├── app/            # Next.js app router
+    ├── components/     # React bileşenleri
+    └── lib/            # Yardımcı fonksiyonlar
+```
+
+## Katkıda Bulunma
+
+1. Bu repo'yu fork edin
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add amazing feature'`)
+4. Branch'ınızı push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
+
+## Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.
 - \`accessed_at\` - Erişim tarihi
 
 ## Deployment (Dağıtım)

@@ -94,21 +94,13 @@ const getUrlByShortCode = async (shortCode) => {
 };
 
 // URL tıklama sayısını artırma
-const incrementClickCount = async (urlId, logData = {}) => {
+const incrementClickCount = async (shortCode) => {
   try {
-    // Tıklama sayısını artır
+    // Tıklama sayısını artır (shortCode ile)
     await pool.execute(
-      'UPDATE urls SET click_count = click_count + 1 WHERE id = ?',
-      [urlId]
+      'UPDATE urls SET click_count = click_count + 1 WHERE short_code = ?',
+      [shortCode]
     );
-    
-    // Log kaydı ekle
-    if (logData.ipAddress || logData.userAgent || logData.referrer) {
-      await pool.execute(
-        'INSERT INTO url_logs (url_id, ip_address, user_agent, referrer) VALUES (?, ?, ?, ?)',
-        [urlId, logData.ipAddress || null, logData.userAgent || null, logData.referrer || null]
-      );
-    }
     
     return true;
   } catch (err) {
@@ -166,5 +158,61 @@ module.exports = {
   getUrlByShortCode,
   incrementClickCount,
   getAllUrls,
-  getUrlStats
+  getUrlStats,
+  // Yeni API route'lar için ek fonksiyonlar
+  create: async ({ originalUrl, shortCode }) => {
+    try {
+      const [result] = await pool.execute(
+        'INSERT INTO urls (original_url, short_code) VALUES (?, ?)',
+        [originalUrl, shortCode]
+      );
+      
+      return {
+        id: result.insertId,
+        originalUrl,
+        shortCode
+      };
+    } catch (err) {
+      console.error('URL oluşturma hatası:', err);
+      throw err;
+    }
+  },
+  findByOriginalUrl: async (originalUrl) => {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM urls WHERE original_url = ?',
+        [originalUrl]
+      );
+      
+      return rows.length > 0 ? rows[0] : null;
+    } catch (err) {
+      console.error('URL bulma hatası:', err);
+      throw err;
+    }
+  },
+  findByShortCode: async (shortCode) => {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM urls WHERE short_code = ?',
+        [shortCode]
+      );
+      
+      return rows.length > 0 ? rows[0] : null;
+    } catch (err) {
+      console.error('URL bulma hatası:', err);
+      throw err;
+    }
+  },
+  findAll: async () => {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM urls ORDER BY created_at DESC'
+      );
+      
+      return rows;
+    } catch (err) {
+      console.error('Tüm URL\'leri getirme hatası:', err);
+      throw err;
+    }
+  }
 };
