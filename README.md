@@ -151,6 +151,34 @@ PORT=3001 npm run dev
 - \`referrer\` - Yönlendiren sayfa
 - \`accessed_at\` - Erişim tarihi
 
+## Deployment (Dağıtım)
+
+Bu uygulama Vercel platformunda kolayca dağıtılabilir. Detaylı dağıtım talimatları için `DEPLOYMENT.md` dosyasına bakın.
+
+### Hızlı Vercel Dağıtımı
+
+1. **GitHub Repository'yi Fork/Clone edin**
+2. **Vercel hesabınıza giriş yapın**: [vercel.com](https://vercel.com)
+3. **"New Project" butonuna tıklayın**
+4. **Bu repository'yi seçin**
+5. **Environment Variables'ları ekleyin**:
+   - `DB_HOST` - MySQL veritabanı host adresi
+   - `DB_USER` - MySQL kullanıcı adı
+   - `DB_PASSWORD` - MySQL şifresi
+   - `DB_DATABASE` - Veritabanı adı
+   - `NEXT_PUBLIC_API_URL` - API URL'i (otomatik oluşturulur)
+6. **Deploy butonuna tıklayın**
+
+### Veritabanı Seçenekleri
+- **PlanetScale** - MySQL uyumlu serverless veritabanı
+- **Railway** - MySQL veritabanı hosting
+- **AWS RDS** - Ölçeklenebilir MySQL çözümü
+
+### Production URL
+Dağıtım tamamlandığında, uygulamanız şu şekilde erişilebilir olacak:
+- **Frontend**: `https://your-app-name.vercel.app`
+- **API**: `https://your-app-name.vercel.app/api`
+
 ## Özellikler
 
 ### ✅ Tamamlanan Özellikler
@@ -163,6 +191,8 @@ PORT=3001 npm run dev
 - [x] Form validasyonu
 - [x] Error handling
 - [x] Toast bildirimleri
+- [x] Production deployment yapılandırması
+- [x] Vercel uyumlu serverless API
 
 ### 🚀 Gelecek Özellikler
 - [ ] Kullanıcı hesap sistemi
