@@ -60,18 +60,24 @@ const startServer = async () => {
     // Veritabanı tabloları oluştur
     await urlModel.initializeDatabase();
     
-    // Sunucuyu başlat
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-      console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
-    });
+    // Sunucuyu başlat (sadece development modunda)
+    if (process.env.NODE_ENV !== 'production') {
+      const PORT = process.env.PORT || 3000;
+      app.listen(PORT, () => {
+        console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
+      });
+    }
   } catch (err) {
     console.error('Sunucu başlatma hatası:', err);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 };
 
-// Sunucuyu başlat
-startServer();
+// Development modunda sunucuyu başlat
+if (process.env.NODE_ENV !== 'production') {
+  startServer();
+}
 
 module.exports = app;
