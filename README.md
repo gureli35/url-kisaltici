@@ -186,7 +186,7 @@ Bu proje MIT lisansı altında lisanslanmıştır.
 
 ## İletişim
 
-Proje geliştiricisi: Zeynep Anılgan
+Proje geliştiricisi: Furkan Güreli
 
 ---
 
